@@ -46,7 +46,7 @@ import de.kuehweg.education.mentalist.domain.Rating;
 public class RatingAgency {
 
 	private static final long INCREASE_RATING_FOR_MOST_COMMON_ANSWER = 100L;
-	private static final long INCREASE_RATING_FOR_PROBABLE_GUESSES = 60L;
+	private static final long INCREASE_RATING_FOR_PROBABLE_GUESSES = 70L;
 	private static final long INCREASE_RATING_FOR_MISSING_KNOWLEDGE = 50L;
 
 	@Autowired

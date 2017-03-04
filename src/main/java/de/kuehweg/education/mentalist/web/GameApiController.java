@@ -154,7 +154,7 @@ public class GameApiController {
 		}
 		List<CurrentRating> currentRatings = currentRatingsByRating
 				.values().stream().sorted((currentRating1, currentRating2) -> Long
-						.compare(currentRating1.getRatingPoints(), currentRating2.getRatingPoints()))
+						.compare(currentRating2.getRatingPoints(), currentRating1.getRatingPoints()))
 				.collect(Collectors.toList());
 		return currentRatings.subList(0, Math.min(currentRatings.size(), 10));
 	}

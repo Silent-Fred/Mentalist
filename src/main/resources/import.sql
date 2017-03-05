@@ -465,7 +465,6 @@ insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (4, 19, 0, 0, 100, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (5, 19, 0, 0, 100, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (6, 19, 0, 0, 100, 0, 0);   
-insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (7, 19, 0, 0, 100, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (8, 19, 0, 0, 100, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (9, 19, 0, 0, 100, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (10, 19, 0, 0, 100, 0, 0);  
@@ -483,6 +482,7 @@ insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (22, 19, 0, 0, 100, 0, 0);  
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (23, 19, 0, 0, 100, 0, 0);  
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (2, 19, 5, 0, 95, 0, 0);    
+insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (7, 19, 80, 5, 15, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (6, 20, 100, 0, 0, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (7, 20, 100, 0, 0, 0, 0);   
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no) values (23, 20, 100, 0, 0, 0, 0);  

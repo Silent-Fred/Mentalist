@@ -788,7 +788,6 @@ and celebrity.name in (
 'Donald F. Duck',
 'Albert Einstein',
 'R2D2',
-'Data',
 'Daniel Glattauer',
 'Raymond Radiguet',
 'Gottlieb Daimler',
@@ -812,6 +811,13 @@ from celebrity cross join question
 where question.text = 'Hat die Figur eine Katze als Haustier?'
 and celebrity.name in (
 'Audrey Hepburn'
+);
+insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no)
+select celebrity.id, question.id, 80, 5, 15, 0, 0
+from celebrity cross join question
+where question.text = 'Hat die Figur eine Katze als Haustier?'
+and celebrity.name in (
+'Data'
 );
 --
 insert into knowledge_base (celebrity_id, question_id, yes, no, dunno, probably_yes, probably_no)

@@ -27,6 +27,7 @@
 package de.kuehweg.education.mentalist.web;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +145,8 @@ public class GameApiController {
 			CurrentRating currentRating = currentRatingsByRating.get(rating.getRating());
 			if (currentRating == null) {
 				currentRating = new CurrentRating();
+				currentRating.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
+						.celebritiesWithRating(game.getId(), rating.getRating())).withRel("celebs"));
 				currentRating.setRatingPoints(rating.getRating());
 				currentRating.setPercentageOfMaximallyPossibleRating(
 						bestRating == 0L ? 0 : (int) (currentRating.getRatingPoints() * 100 / bestRating));
@@ -157,6 +160,20 @@ public class GameApiController {
 						.compare(currentRating2.getRatingPoints(), currentRating1.getRatingPoints()))
 				.collect(Collectors.toList());
 		return currentRatings.subList(0, Math.min(currentRatings.size(), 10));
+	}
+
+	@RequestMapping(value = "/game/{game}/celebrities/with/rating/{rating}", method = RequestMethod.GET)
+	public List<Celebrity> celebritiesWithRating(@PathVariable("game") Long gameId,
+			@PathVariable("rating") Long queriedRating) {
+		List<Celebrity> celebrities = new ArrayList<>();
+		Game game = gameRepository.findOne(gameId);
+		for (Rating rating : game.getRatings()) {
+			if (rating.getRating() == queriedRating) {
+				celebrities.add(rating.getCelebrity());
+			}
+		}
+		celebrities.sort((celebrity1, celebrity2) -> celebrity1.getName().compareTo(celebrity2.getName()));
+		return celebrities;
 	}
 
 	@RequestMapping(value = "/game/{game}/confirm/celebrity/{celebrity}", method = RequestMethod.GET)

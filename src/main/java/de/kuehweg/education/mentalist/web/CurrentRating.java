@@ -26,7 +26,9 @@
 
 package de.kuehweg.education.mentalist.web;
 
-public class CurrentRating {
+import org.springframework.hateoas.ResourceSupport;
+
+public class CurrentRating extends ResourceSupport {
 
 	private long ratingPoints;
 	private int percentageOfMaximallyPossibleRating;

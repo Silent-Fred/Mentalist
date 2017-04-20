@@ -122,6 +122,7 @@ public class GameApiController {
 		Question question = questionnaire.nextQuestion(game);
 		NextMove nextMove = new NextMove();
 		nextMove.setMyQuestion(question);
+		nextMove.setQuestionNumber(game.getAnswers().size() + 1);
 		addAnswers(nextMove, game.getId(), question.getId());
 		return nextMove;
 	}

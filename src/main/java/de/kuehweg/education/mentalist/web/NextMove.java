@@ -40,6 +40,8 @@ public class NextMove extends ResourceSupport {
 
 	private Question myQuestion;
 
+	private Integer questionNumber;
+
 	// service end points for answers will be added dynamically (cf.
 	// ResourceSupport)
 
@@ -65,5 +67,13 @@ public class NextMove extends ResourceSupport {
 
 	public void setMyQuestion(Question myQuestion) {
 		this.myQuestion = myQuestion;
+	}
+
+	public Integer getQuestionNumber() {
+		return questionNumber;
+	}
+
+	public void setQuestionNumber(Integer questionNumber) {
+		this.questionNumber = questionNumber;
 	}
 }

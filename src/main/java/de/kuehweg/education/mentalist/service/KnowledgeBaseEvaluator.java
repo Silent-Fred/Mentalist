@@ -49,7 +49,7 @@ public class KnowledgeBaseEvaluator {
 	public KnowledgeBaseEvaluator() {
 	}
 
-	public long numberOfMostCommonAnswer(KnowledgeBase knowledgeBase) {
+	public long numberOfMostCommonAnswer(final KnowledgeBase knowledgeBase) {
 		long max = knowledgeBase.getYes();
 		if (knowledgeBase.getNo() > max) {
 			max = knowledgeBase.getNo();
@@ -66,12 +66,13 @@ public class KnowledgeBaseEvaluator {
 		return max;
 	}
 
-	public long overallNumberOfGivenAnswers(KnowledgeBase knowledgeBase) {
+	public long overallNumberOfGivenAnswers(final KnowledgeBase knowledgeBase) {
 		return knowledgeBase.getYes() + knowledgeBase.getNo() + knowledgeBase.getDunno()
 				+ knowledgeBase.getProbablyYes() + knowledgeBase.getProbablyNo();
 	}
 
-	public long numberOfTimesTheAnswerWas(KnowledgeBase knowledgeBase, DefinedAnswers answer) {
+	public long numberOfTimesTheAnswerWas(final KnowledgeBase knowledgeBase,
+			final DefinedAnswers answer) {
 		switch (answer) {
 		case YES:
 			return knowledgeBase.getYes();
@@ -88,7 +89,7 @@ public class KnowledgeBaseEvaluator {
 		}
 	}
 
-	public DefinedAnswers mostCommonAnswer(KnowledgeBase knowledgeBase) {
+	public DefinedAnswers mostCommonAnswer(final KnowledgeBase knowledgeBase) {
 		long max = knowledgeBase.getDunno();
 		DefinedAnswers answer = DefinedAnswers.DUNNO;
 		if (knowledgeBase.getYes() > max) {
@@ -110,7 +111,8 @@ public class KnowledgeBaseEvaluator {
 		return answer;
 	}
 
-	public void extendKnowledgeFromAnswer(KnowledgeBase knowledgeBase, DefinedAnswers answer) {
+	public void extendKnowledgeFromAnswer(final KnowledgeBase knowledgeBase,
+			final DefinedAnswers answer) {
 		switch (answer) {
 		case YES:
 			knowledgeBase.setYes(knowledgeBase.getYes() + 1L);
@@ -131,21 +133,23 @@ public class KnowledgeBaseEvaluator {
 		}
 	}
 
-	public void updateKnowledgeBase(Game game, Celebrity confirmedCelebrity) {
-		List<KnowledgeBase> persistentKnowledgeBaseForCelebrity = (List<KnowledgeBase>) knowledgeBaseRepository
+	public void updateKnowledgeBase(final Game game, final Celebrity confirmedCelebrity) {
+		final List<KnowledgeBase> persistentKnowledgeBaseForCelebrity = knowledgeBaseRepository
 				.findByCelebrity(confirmedCelebrity);
-		List<KnowledgeBase> knowledgeBaseForUpdate = new ArrayList<>(game.getAnswers().size());
-		for (Answer answer : game.getAnswers()) {
-			knowledgeBaseForUpdate
-					.add(updatedKnowledgeBase(persistentKnowledgeBaseForCelebrity, confirmedCelebrity, answer));
+		final List<KnowledgeBase> knowledgeBaseForUpdate = new ArrayList<>(
+				game.getAnswers().size());
+		for (final Answer answer : game.getAnswers()) {
+			knowledgeBaseForUpdate.add(updatedKnowledgeBase(persistentKnowledgeBaseForCelebrity,
+					confirmedCelebrity, answer));
 		}
-		knowledgeBaseRepository.save(knowledgeBaseForUpdate);
+		knowledgeBaseRepository.saveAll(knowledgeBaseForUpdate);
 	}
 
-	private KnowledgeBase updatedKnowledgeBase(Collection<KnowledgeBase> existingKnowledgeBase, Celebrity celebrity,
-			Answer answer) {
+	private KnowledgeBase updatedKnowledgeBase(
+			final Collection<KnowledgeBase> existingKnowledgeBase, final Celebrity celebrity,
+			final Answer answer) {
 		KnowledgeBase knowledgeBaseToUpdate = null;
-		for (KnowledgeBase entry : existingKnowledgeBase) {
+		for (final KnowledgeBase entry : existingKnowledgeBase) {
 			if (entry.getQuestion().getId().equals(answer.getQuestion().getId())) {
 				knowledgeBaseToUpdate = entry;
 				break;

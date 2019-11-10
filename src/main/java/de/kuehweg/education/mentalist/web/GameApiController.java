@@ -87,110 +87,124 @@ public class GameApiController {
 	private Questionnaire questionnaire;
 
 	@RequestMapping(value = "/celebrity/{id}", method = RequestMethod.GET)
-	public Celebrity celebrity(@PathVariable("id") Long id) {
-		return celebrityRepository.findOne(id);
+	public Celebrity celebrity(@PathVariable("id") final Long id) {
+		return celebrityRepository.findById(id).orElse(null);
 	}
 
 	@RequestMapping(value = "/game/start", method = RequestMethod.GET)
 	public NextMove gameStart() {
-		Game game = new Game();
+		final Game game = new Game();
 		ratingAgency.prepareRatingForGame(game);
 		gameRepository.save(game);
-		NextMove nextMove = createBasicNextMove(game);
+		final NextMove nextMove = createBasicNextMove(game);
 		nextMove.setCurrentRatings(currentRatings(game));
 
 		return nextMove;
 	}
 
 	@RequestMapping(value = "/game/{game}/question/{question}/answer/{answer}", method = RequestMethod.GET)
-	public NextMove nextMove(@PathVariable("game") Long gameId, @PathVariable("question") Long questionId,
-			@PathVariable("answer") DefinedAnswers answer) {
-		Game game = gameRepository.findOne(gameId);
-		Question question = questionRepository.findOne(questionId);
-		Answer givenAnswer = new Answer(question, answer);
+	public NextMove nextMove(@PathVariable("game") final Long gameId,
+			@PathVariable("question") final Long questionId,
+			@PathVariable("answer") final DefinedAnswers answer) {
+		final Game game = gameRepository.findById(gameId).orElse(null);
+		final Question question = questionRepository.findById(questionId).orElse(null);
+		final Answer givenAnswer = new Answer(question, answer);
 		game.getAnswers().add(givenAnswer);
 		ratingAgency.updateRatingsAccordingToGivenAnswer(game, givenAnswer);
 		gameRepository.save(game);
 
-		NextMove nextMove = endOfGameIsReached(game) ? createFinalMove(game) : createBasicNextMove(game);
+		final NextMove nextMove = endOfGameIsReached(game) ? createFinalMove(game)
+				: createBasicNextMove(game);
 		nextMove.setCurrentRatings(currentRatings(game));
 
 		return nextMove;
 	}
 
-	private NextMove createBasicNextMove(Game game) {
-		Question question = questionnaire.nextQuestion(game);
-		NextMove nextMove = new NextMove();
+	private NextMove createBasicNextMove(final Game game) {
+		final Question question = questionnaire.nextQuestion(game);
+		final NextMove nextMove = new NextMove();
 		nextMove.setMyQuestion(question);
 		nextMove.setQuestionNumber(game.getAnswers().size() + 1);
 		addAnswers(nextMove, game.getId(), question.getId());
 		return nextMove;
 	}
 
-	private NextMove createFinalMove(Game game) {
-		NextMove nextMove = new NextMove();
-		EducatedGuess myGuess = new EducatedGuess();
+	private NextMove createFinalMove(final Game game) {
+		final NextMove nextMove = new NextMove();
+		final EducatedGuess myGuess = new EducatedGuess();
 		myGuess.setMyGuess(new MakeAGuess(game).bestGuessSoFar());
-		myGuess.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
-				.confirm(game.getId(), myGuess.getMyGuess().getId())).withRel(REL_CONFIRM));
-		myGuess.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
-				.correctWronglyGuessedCelebrity(game.getId(), null)).withRel(REL_RECTIFY));
+		myGuess.add(
+				ControllerLinkBuilder
+						.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
+								.confirm(game.getId(), myGuess.getMyGuess().getId()))
+						.withRel(REL_CONFIRM));
+		myGuess.add(
+				ControllerLinkBuilder
+						.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
+								.correctWronglyGuessedCelebrity(game.getId(), null))
+						.withRel(REL_RECTIFY));
 		nextMove.setMyGuess(myGuess);
 		return nextMove;
 	}
 
-	private List<CurrentRating> currentRatings(Game game) {
-		Map<Long, CurrentRating> currentRatingsByRating = new HashMap<>();
-		long bestRating = ratingAgency.bestRatingPossibleUpToNow(game);
-		for (Rating rating : game.getRatings()) {
+	private List<CurrentRating> currentRatings(final Game game) {
+		final Map<Long, CurrentRating> currentRatingsByRating = new HashMap<>();
+		final long bestRating = ratingAgency.bestRatingPossibleUpToNow(game);
+		for (final Rating rating : game.getRatings()) {
 			CurrentRating currentRating = currentRatingsByRating.get(rating.getRating());
 			if (currentRating == null) {
 				currentRating = new CurrentRating();
-				currentRating.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
-						.celebritiesWithRating(game.getId(), rating.getRating())).withRel("celebs"));
+				currentRating.add(ControllerLinkBuilder
+						.linkTo(ControllerLinkBuilder.methodOn(GameApiController.class)
+								.celebritiesWithRating(game.getId(), rating.getRating()))
+						.withRel("celebs"));
 				currentRating.setRatingPoints(rating.getRating());
-				currentRating.setPercentageOfMaximallyPossibleRating(
-						bestRating == 0L ? 0 : (int) (currentRating.getRatingPoints() * 100 / bestRating));
+				currentRating.setPercentageOfMaximallyPossibleRating(bestRating == 0L ? 0
+						: (int) (currentRating.getRatingPoints() * 100 / bestRating));
 				currentRatingsByRating.put(currentRating.getRatingPoints(), currentRating);
 			}
 			currentRating.setNumberOfCelebritiesSharingThisRating(
 					currentRating.getNumberOfCelebritiesSharingThisRating() + 1);
 		}
-		List<CurrentRating> currentRatings = currentRatingsByRating
-				.values().stream().sorted((currentRating1, currentRating2) -> Long
-						.compare(currentRating2.getRatingPoints(), currentRating1.getRatingPoints()))
+		final List<CurrentRating> currentRatings = currentRatingsByRating.values().stream()
+				.sorted((currentRating1, currentRating2) -> Long.compare(
+						currentRating2.getRatingPoints(), currentRating1.getRatingPoints()))
 				.collect(Collectors.toList());
 		return currentRatings.subList(0, Math.min(currentRatings.size(), 10));
 	}
 
 	@RequestMapping(value = "/game/{game}/celebrities/with/rating/{rating}", method = RequestMethod.GET)
-	public List<Celebrity> celebritiesWithRating(@PathVariable("game") Long gameId,
-			@PathVariable("rating") Long queriedRating) {
-		List<Celebrity> celebrities = new ArrayList<>();
-		Game game = gameRepository.findOne(gameId);
-		for (Rating rating : game.getRatings()) {
+	public List<Celebrity> celebritiesWithRating(@PathVariable("game") final Long gameId,
+			@PathVariable("rating") final Long queriedRating) {
+		final List<Celebrity> celebrities = new ArrayList<>();
+		final Game game = gameRepository.findById(gameId).orElse(null);
+		for (final Rating rating : game.getRatings()) {
 			if (rating.getRating() == queriedRating) {
 				celebrities.add(rating.getCelebrity());
 			}
 		}
-		celebrities.sort((celebrity1, celebrity2) -> celebrity1.getName().compareTo(celebrity2.getName()));
+		celebrities.sort(
+				(celebrity1, celebrity2) -> celebrity1.getName().compareTo(celebrity2.getName()));
 		return celebrities;
 	}
 
 	@RequestMapping(value = "/game/{game}/confirm/celebrity/{celebrity}", method = RequestMethod.GET)
-	public ResponseEntity<?> confirm(@PathVariable("game") Long gameId, @PathVariable("celebrity") Long celebrityId) {
-		Game game = gameRepository.findOne(gameId);
-		Celebrity celebrity = celebrityRepository.findOne(celebrityId);
+	public ResponseEntity<?> confirm(@PathVariable("game") final Long gameId,
+			@PathVariable("celebrity") final Long celebrityId) {
+		final Game game = gameRepository.findById(gameId).orElse(null);
+		final Celebrity celebrity = celebrityRepository.findById(celebrityId).orElse(null);
 		knowledgeBaseEvaluator.updateKnowledgeBase(game, celebrity);
-		gameRepository.delete(gameId);
-		gameRepository.deleteByLastActivityLessThan(LocalDateTime.now().minusMinutes(TIMEOUT_MINUTES));
+		gameRepository.deleteById(gameId);
+		gameRepository
+				.deleteByLastActivityLessThan(LocalDateTime.now().minusMinutes(TIMEOUT_MINUTES));
 		return ResponseEntity.noContent().build();
 	}
 
 	@RequestMapping(value = "/game/{game}/correct}", method = RequestMethod.POST)
-	public ResponseEntity<?> correctWronglyGuessedCelebrity(@PathVariable("game") Long gameId,
-			@RequestBody Celebrity celebrity) {
-		Celebrity persistentCelebrityWithSameName = celebrityRepository.findByName(celebrity.getName());
+	public ResponseEntity<?> correctWronglyGuessedCelebrity(@PathVariable("game") final Long gameId,
+			@RequestBody final Celebrity celebrity) {
+		Celebrity persistentCelebrityWithSameName = celebrityRepository
+				.findByName(celebrity.getName());
 		if (persistentCelebrityWithSameName == null) {
 			persistentCelebrityWithSameName = createCelebrity(celebrity);
 		}
@@ -198,19 +212,19 @@ public class GameApiController {
 		return ResponseEntity.noContent().build();
 	}
 
-	private void addAnswers(NextMove nextMove, Long gameId, Long questionId) {
-		for (DefinedAnswers answer : DefinedAnswers.values()) {
-			nextMove.add(ControllerLinkBuilder.linkTo(
-					ControllerLinkBuilder.methodOn(GameApiController.class).nextMove(gameId, questionId, answer))
+	private void addAnswers(final NextMove nextMove, final Long gameId, final Long questionId) {
+		for (final DefinedAnswers answer : DefinedAnswers.values()) {
+			nextMove.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder
+					.methodOn(GameApiController.class).nextMove(gameId, questionId, answer))
 					.withRel(answer.name()));
 		}
 	}
 
-	private Celebrity createCelebrity(Celebrity celebrity) {
+	private Celebrity createCelebrity(final Celebrity celebrity) {
 		return celebrityRepository.save(celebrity);
 	}
 
-	private boolean endOfGameIsReached(Game game) {
+	private boolean endOfGameIsReached(final Game game) {
 		return game.getAnswers().size() >= NUMBER_OF_QUESTIONS_PER_GAME;
 	}
 }
